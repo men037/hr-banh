@@ -1,0 +1,144 @@
+<?php
+// 1. เพิ่มบรรทัด Debug (เปิดเฉพาะตอนแก้ปัญหา ถ้าแก้เสร็จแล้วให้ลบออกหรือคอมเมนต์ไว้)
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+include('auth.php'); 
+checkAdmin(); 
+include('config.php');
+date_default_timezone_set('Asia/Bangkok');
+
+// 2. ฟังก์ชันเขียน Log (กรณีไม่ได้ Include มาจากที่อื่น)
+if (!function_exists('write_log')) {
+    function write_log($conn, $action, $table, $id, $details) {
+        $user_id = $_SESSION['user_id'] ?? 'system';
+        $details_clean = mysqli_real_escape_string($conn, $details);
+        $sql_log = "INSERT INTO sys_log (action_type, table_name, record_id, details, user_id, log_date) 
+                    VALUES ('$action', '$table', '$id', '$details_clean', '$user_id', NOW())";
+        mysqli_query($conn, $sql_log);
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $old_cid = mysqli_real_escape_string($conn, $_POST['old_cid']);
+    
+    // 1. ดึงข้อมูลเดิม
+    $sql_before = "SELECT * FROM staff_main WHERE cid = '$old_cid'";
+    $res_before = mysqli_query($conn, $sql_before);
+    $old_data = mysqli_fetch_assoc($res_before);
+
+    if (!$old_data) {
+        echo "<script>alert('ไม่พบข้อมูลเดิม'); window.history.back();</script>";
+        exit;
+    }
+
+    // 2. รับค่าจากฟอร์ม
+    $fname = mysqli_real_escape_string($conn, $_POST['fname']);
+    $lname = mysqli_real_escape_string($conn, $_POST['lname']);
+    $cid = mysqli_real_escape_string($conn, $_POST['cid']);
+    $staff_id = mysqli_real_escape_string($conn, $_POST['staff_id']);
+    $license_no = mysqli_real_escape_string($conn, $_POST['license_no']);
+    $position_no = mysqli_real_escape_string($conn, $_POST['position_no']);
+    $s_group_id = mysqli_real_escape_string($conn, $_POST['s_group_id']);
+    $s_dept_id = mysqli_real_escape_string($conn, $_POST['s_dept_id']);
+    $workplace_s = mysqli_real_escape_string($conn, $_POST['workplace_s']);
+    $ed_id = mysqli_real_escape_string($conn, $_POST['ed_id']);
+
+    $prefix_id = mysqli_real_escape_string($conn, $_POST['prefix_id']);
+    $prefix_academic_id_val = $_POST['prefix_academic_id'] ?? ""; 
+    $type_id_val = $_POST['type_id'] ?: "";
+    $position_id = mysqli_real_escape_string($conn, $_POST['position_id']);
+    $provider_pos_id = mysqli_real_escape_string($conn, $_POST['provider_pos_id']);
+    $group_id = mysqli_real_escape_string($conn, $_POST['group_id']);
+    $dept_id = mysqli_real_escape_string($conn, $_POST['dept_id']);
+    $work_status = mysqli_real_escape_string($conn, $_POST['work_status']);
+    $provider_status = mysqli_real_escape_string($conn, $_POST['provider_status'] ?? "");
+    $ekyc_status = mysqli_real_escape_string($conn, $_POST['ekyc_status'] ?? "");
+    $gender_id_val = $_POST['gender_id'] ?? "";
+    $birthday_val = $_POST['birthday'] ?? "";
+    $start_date_val = $_POST['start_date'] ?? "";
+    $end_date_val = $_POST['end_date'] ?? "";
+    $leave_reason_id_val = $_POST['leave_reason_id'] ?? "";
+
+    // 3. เปรียบเทียบข้อมูลเพื่อทำ Log
+    $diff = [];
+    $check_fields = [
+        'cid' => 'เลขบัตรประชาชน', 'staff_id' => 'รหัสเจ้าหน้าที่', 'license_no' => 'เลขใบประกอบ',
+        'position_no' => 'เลขที่ตำแหน่ง', 'fname' => 'ชื่อ', 'lname' => 'นามสกุล',
+        'ed_id' => 'การศึกษาสูงสุด', 'prefix_id' => 'คำนำหน้า', 'prefix_academic_id' => 'คำนำหน้าวิชาการ',
+        'gender_id' => 'เพศ', 'type_id' => 'ประเภทพนักงาน', 'position_id' => 'ตำแหน่ง',
+        'provider_pos_id' => 'ตำแหน่งสายงาน', 'group_id' => 'กลุ่มภารกิจ', 'dept_id' => 'แผนก/ฝ่าย',
+        's_group_id' => 'กลุ่มงานจริง', 's_dept_id' => 'หน่วยงานจริง', 'workplace_s' => 'สถานที่จริง',
+        'birthday' => 'วันเกิด', 'start_date' => 'วันเริ่มงาน', 'work_status' => 'สถานะการทำงาน'
+    ];
+
+    foreach ($check_fields as $field => $label) {
+        $new_v = $_POST[$field] ?? "";
+        $old_v = $old_data[$field] ?? "";
+        if ((string)$new_v !== (string)$old_v) {
+            $diff[] = "$label: [$old_v] -> [$new_v]";
+        }
+    }
+    $log_details = !empty($diff) ? "แก้ไข: " . implode(" | ", $diff) : "ไม่มีการเปลี่ยนค่า";
+
+    // 4. เตรียมค่า SQL
+    $gender_sql = !empty($gender_id_val) ? "'$gender_id_val'" : "NULL";
+    $type_sql = !empty($type_id_val) ? "'$type_id_val'" : "NULL";
+    $academic_sql = !empty($prefix_academic_id_val) ? "'$prefix_academic_id_val'" : "NULL";
+    $bday_sql = !empty($birthday_val) ? "'$birthday_val'" : "NULL";
+    $start_sql = !empty($start_date_val) ? "'$start_date_val'" : "NULL";
+    $ed_sql = !empty($ed_id) ? "'$ed_id'" : "NULL";
+    $s_group_sql = !empty($s_group_id) ? "'$s_group_id'" : "NULL";
+    $s_dept_sql = !empty($s_dept_id) ? "'$s_dept_id'" : "NULL";
+
+    if ($work_status === 'Y') {
+        $end_sql = "NULL";
+        $leave_reason_sql = "NULL";
+    } else {
+        $end_sql = !empty($end_date_val) ? "'$end_date_val'" : "NULL";
+        $leave_reason_sql = !empty($leave_reason_id_val) ? "'$leave_reason_id_val'" : "NULL";
+    }
+
+    $updated_at = date('Y-m-d H:i:s');
+
+    // 5. UPDATE
+    $sql = "UPDATE staff_main SET 
+                cid = '$cid', staff_id = '$staff_id', license_no = '$license_no', 
+                position_no = '$position_no', fname = '$fname', lname = '$lname', 
+                ed_id = $ed_sql, gender_id = $gender_sql, type_id = $type_sql, 
+                birthday = $bday_sql, start_date = $start_sql, end_date = $end_sql, 
+                leave_reason_id = $leave_reason_sql, prefix_id = '$prefix_id', 
+                prefix_academic_id = $academic_sql, position_id = '$position_id', 
+                provider_pos_id = '$provider_pos_id', group_id = '$group_id', 
+                dept_id = '$dept_id', s_group_id = $s_group_sql, 
+                s_dept_id = $s_dept_sql, workplace_s = '$workplace_s', 
+                work_status = '$work_status', provider_status = '$provider_status', 
+                ekyc_status = '$ekyc_status', updated_at = '$updated_at' 
+                WHERE cid = '$old_cid'";
+
+    if (mysqli_query($conn, $sql)) {
+        write_log($conn, 'EDIT', 'staff_main', $staff_id, $log_details);
+        // แสดง SweetAlert พร้อมโครงสร้าง HTML ที่สมบูรณ์
+        echo "<!DOCTYPE html>
+        <html>
+        <head>
+            <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        </head>
+        <body>
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'อัปเดตข้อมูลสำเร็จ',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.href='staff_list.php';
+                });
+            </script>
+        </body>
+        </html>";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>

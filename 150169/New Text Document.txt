@@ -1,0 +1,22 @@
+<?php
+// ตั้งค่าการเชื่อมต่อฐานข้อมูล
+$host = "localhost";      // ส่วนใหญ่เป็น localhost
+$username = "root";       // ชื่อผู้ใช้ (ค่าเริ่มต้นของ XAMPP คือ root)
+$password = "";           // รหัสผ่าน (ค่าเริ่มต้นของ XAMPP คือว่างเปล่า)
+$dbname = "your_database_name"; // *** เปลี่ยนชื่อตรงนี้ให้ตรงกับชื่อฐานข้อมูลของคุณ ***
+
+// สร้างการเชื่อมต่อ
+$conn = mysqli_connect($host, $username, $password, $dbname);
+
+// ตรวจสอบการเชื่อมต่อ
+if (!$conn) {
+    die("การเชื่อมต่อฐานข้อมูลล้มเหลว: " . mysqli_connect_error());
+}
+
+// ตั้งค่าให้รองรับภาษาไทย (UTF-8)
+mysqli_set_charset($conn, "utf8mb4");
+
+// แสดง Error เพื่อใช้ในการเขียนโปรแกรม (ลบออกเมื่อขึ้นระบบจริง)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+?>
