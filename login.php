@@ -100,7 +100,7 @@
 
 <div class="text-center mt-auto pt-2 border-top">
     <p class="small text-footer mb-1">
-        © 2026 โรงพยาบาลบ้านนา สงวนลิขสิทธิ์
+        © 2025 โรงพยาบาลบ้านนา สงวนลิขสิทธิ์
     </p>
 </div>
     </div>
