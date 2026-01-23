@@ -131,7 +131,14 @@ if (isset($_GET['id'])) {
                 </div>
                 <div class="col-md-2">
                     <label>วันเดือนปีเกิด</label>
-                    <div class="view-box"><?php echo ($row['birthday'] != '0000-00-00') ? date('d/m/Y', strtotime($row['birthday'])) : '-'; ?></div>
+                    <div class="view-box">
+                        <?php 
+                            echo (!empty($row['birthday']) && $row['birthday'] != '0000-00-00') 
+                                ? date('d/m/Y', strtotime($row['birthday'])) 
+                                : '-'; 
+                        ?>
+                    </div>
+                    <!-- <div class="view-box"><?php echo ($row['birthday'] != '0000-00-00') ? date('d/m/Y', strtotime($row['birthday'])) : '-'; ?></div> -->
                 </div>
                 <div class="col-md-2">
                     <label>เลขที่ตำแหน่ง</label>
@@ -201,7 +208,13 @@ if (isset($_GET['id'])) {
             <div class="row g-2 mb-3 align-items-center">
                 <div class="col-md-3">
                     <label>วันเริ่มปฏิบัติงาน</label>
-                    <div class="view-box"><?php echo ($row['start_date'] != '0000-00-00') ? date('d/m/Y', strtotime($row['start_date'])) : '-'; ?></div>
+                    <div class="view-box">
+                        <?php 
+                            echo (!empty($row['start_date']) && $row['start_date'] != '0000-00-00') 
+                                ? date('d/m/Y', strtotime($row['start_date'])) 
+                                : '-'; 
+                        ?>
+                    </div>
                 </div>
                 <div class="col-md-3">
                     <label>สถานะปัจจุบัน</label>
