@@ -235,27 +235,43 @@ $next_staff_id = "B" . sprintf("%05d", $next_num);
                             ?>
                         </select>
                     </div>
-                    <div class="col-md-4 mt-2">
-                    <label>กลุ่มงานจริง (ตาม จ)</label>
-                        <select name="s_group_id" class="form-select">
+                    
+                   <div class="col-md-12 mt-2">
+                <div class="row g-2 align-items-end"> 
+                    <div class="col-md-2">
+                        <label class="d-block">สถานะ จ <span class="text-danger">*</span></label>
+                        <div class="status-toggle d-flex">
+                            <input type="radio" name="status_s" id="sts_y" value="Y" checked required>
+                            <label for="sts_y" class="lab-yes"><i class="fas fa-check-circle me-1"></i> ตาม</label>
+                            
+                            <input type="radio" name="status_s" id="sts_n" value="N">
+                            <label for="sts_n" class="lab-no"><i class="fas fa-times-circle me-1"></i> ไม่ตาม</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>กลุ่มงานจริง (ตาม จ)</label>
+                        <select name="s_group_id" id="s_group_id" class="form-select" disabled>
                             <option value="">-- เลือก --</option>
                             <?php $res_gs=mysqli_query($conn,"SELECT * FROM ref_group_s ORDER BY g_id ASC"); while($gs=mysqli_fetch_assoc($res_gs)) echo "<option value='{$gs['g_id']}'>{$gs['g_name']}</option>"; ?>
                         </select>
                     </div>
-                    <div class="col-md-4 mt-2">
-                    <label>หน่วยงาน (ตาม จ)</label>
-                        <select name="s_dept_id" class="form-select">
+
+                    <div class="col-md-3">
+                        <label>หน่วยงาน (ตาม จ)</label>
+                        <select name="s_dept_id" id="s_dept_id" class="form-select" disabled>
                             <option value="">-- เลือก --</option>
                             <?php $res_ds=mysqli_query($conn,"SELECT * FROM ref_dept_s ORDER BY d_id ASC"); while($ds=mysqli_fetch_assoc($res_ds)) echo "<option value='{$ds['d_id']}'>{$ds['d_name']}</option>"; ?>
                         </select>
                     </div>
-                    <div class="col-md-4 mt-2">
-                    <label>สถานที่ปฏิบัติ (ตาม จ)</label>
-                        <input type="text" name="workplace_s" class="form-control" placeholder="ระบุ">
+
+                    <div class="col-md-4">
+                        <label>สถานที่ปฏิบัติ (ตาม จ)</label>
+                        <input type="text" name="workplace_s" id="workplace_s" class="form-control" placeholder="ระบุสถานที่" disabled>
                     </div>
                 </div>
-
-                <div class="section-title mt-4"><i class="fas fa-cog"></i> สถานะและวันที่เริ่มงาน</div>
+            </div>
+                <div class="section-title mt-3"><i class="fas fa-cog"></i> สถานะและวันที่เริ่มงาน</div>
                 <div class="row g-2 align-items-end">
                     <div class="col-md-3">
                     <label>วันเริ่มงาน <span class="text-danger">*</span></label>
@@ -320,6 +336,31 @@ document.getElementsByName('cid')[0].addEventListener('blur', function() {
             });
     }
 });
+function toggleStatusFields() {
+    // เช็คว่าปุ่ม 'ไม่ตาม' (sts_n) ถูกเลือกอยู่หรือไม่
+    const isNotFollow = document.getElementById('sts_n').checked;
+    const fields = ['s_group_id', 's_dept_id', 'workplace_s'];
+    
+    fields.forEach(id => {
+        const field = document.getElementById(id);
+        if (isNotFollow) {
+            field.disabled = false;
+            field.style.backgroundColor = "white";
+        } else {
+            field.disabled = true;
+            field.value = ""; // ล้างค่าถ้าเลือก 'ตาม'
+            field.style.backgroundColor = "#f1f3f5";
+        }
+    });
+}
+
+// ฟังเหตุการณ์เมื่อมีการคลิกเปลี่ยนสถานะ
+document.querySelectorAll('input[name="status_s"]').forEach((elem) => {
+    elem.addEventListener("change", toggleStatusFields);
+});
+
+// รันฟังก์ชัน 1 ครั้งตอนโหลดหน้าเว็บ เพื่อตั้งค่าตาม Default (Y)
+window.addEventListener('load', toggleStatusFields);
 </script>
 <!-- footer -->
 <?php include('footer.php'); ?>

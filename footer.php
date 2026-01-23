@@ -41,7 +41,7 @@
             <i class="fas fa-hospital-alt me-1"></i> ระบบฐานข้อมูลบุคลากร โรงพยาบาลบ้านนา
         </p>
         <p class="text-muted" style="font-size: 0.75rem;">
-            Copyright &copy; 2026 งานเทคโนโลยีสารสนเทศ @TM V.260126 | ข้อมูล ณ วันที่ <?php echo date('d/m/Y H:i'); ?>
+            Copyright &copy; 2026 งานเทคโนโลยีสารสนเทศ @TM V.230126 | ข้อมูล ณ วันที่ <?php echo date('d/m/Y H:i'); ?>
         </p>
     </div>
 </footer>

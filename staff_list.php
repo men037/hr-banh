@@ -207,17 +207,18 @@ $show_all = isset($_GET['show_all']) && $_GET['show_all'] == '1';
 <script>
 $(document).ready(function() {
     var table = $('#staffTable').DataTable({
+        "stateSave": true, // 1. เปิดให้ระบบจำค่า Filter/Search/Page
         "language": { "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/th.json" },
         "pageLength": 10,
         "order": [],
         initComplete: function () {
             var api = this.api();
 
-            // 1. จัดการย้าย Dropdown (โค้ดเดิมของคุณ)
+            // ย้าย Dropdown ไปที่เดียวกับช่อง Search
             var searchWrapper = $('#staffTable_wrapper .dataTables_filter');
             $('#filter_container div').prependTo(searchWrapper);
 
-            // 2. ดึงข้อมูลกลุ่มงานและหน่วยงาน (โค้ดเดิมของคุณ)
+            // ดึงข้อมูลกลุ่มงานและหน่วยงานเข้า Dropdown
             api.column(1).nodes().to$().find('.gname-text').each(function() {
                 var txt = $(this).text().trim();
                 if (txt && txt !== '-' && $("#filter_gname option[value='" + txt + "']").length === 0) {
@@ -234,15 +235,39 @@ $(document).ready(function() {
             
             sortDropdown('#filter_gname');
             sortDropdown('#filter_dname');
+
+            // 2. ส่วนสำคัญ: คืนค่าให้ Dropdown เมื่อมีการโหลดหน้าใหม่ (State Restore)
+            var state = api.state.loaded();
+            if (state) {
+                var colSearch = state.columns[1].search.search;
+                if (colSearch) {
+                    // ถ้ามีการค้นหาแบบผสม (?=.*A)(?=.*B)
+                    if (colSearch.includes('(?=.*')) {
+                        var matches = colSearch.match(/\(\?\=\.\*([^\)]+)\)/g);
+                        if (matches) {
+                            matches.forEach(function(m) {
+                                var val = m.replace('(?=.*', '').replace(')', '');
+                                if ($("#filter_gname option[value='" + val + "']").length > 0) $('#filter_gname').val(val);
+                                if ($("#filter_dname option[value='" + val + "']").length > 0) $('#filter_dname').val(val);
+                            });
+                        }
+                    } else {
+                        // ถ้ามีการค้นหาค่าเดียว
+                        if ($("#filter_gname option[value='" + colSearch + "']").length > 0) $('#filter_gname').val(colSearch);
+                        if ($("#filter_dname option[value='" + colSearch + "']").length > 0) $('#filter_dname').val(colSearch);
+                    }
+                }
+            }
+            // อัปเดตปุ่ม Export ตามค่าที่จำไว้
+            updateExportLink();
         }
     });
 
-    // --- ส่วนที่แก้ไข: รวมการกรองตารางและการอัปเดตลิงก์ Export ไว้ด้วยกัน ---
+    // กรองข้อมูลเมื่อ Dropdown เปลี่ยน
     $('#filter_gname, #filter_dname').on('change', function() {
         var gname = $('#filter_gname').val();
         var dname = $('#filter_dname').val();
-        
-        // กรองข้อมูลในตาราง
+
         if (gname && dname) {
             var searchStr = '(?=.*' + gname + ')(?=.*' + dname + ')';
             table.column(1).search(searchStr, true, false).draw();
@@ -252,13 +277,11 @@ $(document).ready(function() {
             table.column(1).search(dname).draw();
         } else {
             table.column(1).search('').draw();
-        }
-
-        // อัปเดตลิงก์ปุ่ม Export (เรียกใช้ฟังก์ชันข้างล่าง)
+       }
         updateExportLink();
     });
 
-    // ดักจับการพิมพ์ในช่อง Search ของ DataTables
+    // อัปเดตลิงก์ Export เมื่อมีการ Search ในช่องค้นหาหลัก
     table.on('search.dt', function() {
         updateExportLink();
     });
@@ -266,7 +289,7 @@ $(document).ready(function() {
     function updateExportLink() {
         var gname = $('#filter_gname').val() || '';
         var dname = $('#filter_dname').val() || '';
-        var search_val = $('#staffTable_filter input').val() || ''; // ช่อง Search ของ DataTable
+        var search_val = $('#staffTable_filter input').val() || ''; 
 
         var params = [];
         if(gname) params.push('group_name=' + encodeURIComponent(gname));
@@ -276,8 +299,7 @@ $(document).ready(function() {
         var finalUrl = 'export_excel2.php?' + params.join('&');
         $('#btnExport').attr('href', finalUrl);
     }
-    
-    // ฟังก์ชัน Sort เดิมของคุณ
+ 
     function sortDropdown(selectId) {
         var cl = $(selectId);
         var opts = cl.find('option:not(:first-child)');

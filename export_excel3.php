@@ -2,10 +2,16 @@
 include('auth.php');
 include('config.php');
 
-// ส่วนต้นของไฟล์ export_excel2.php
-$where_clauses = ["s.work_status = 'Y'"]; 
+// 1. ตรวจสอบสถานะแสดงทั้งหมดหรือไม่
+$show_all = (isset($_GET['show_all']) && $_GET['show_all'] == '1');
+$where_clauses = [];
 
-// ต้องรับค่าตามคีย์ที่ส่งมาจาก $.param ด้านบน
+// ถ้าไม่แสดงทั้งหมด ให้เอาเฉพาะที่ใช้งาน (Work Status = 'Y')
+if (!$show_all) {
+    $where_clauses[] = "s.work_status = 'Y'";
+}
+
+// 2. รับค่า Filter ต่างๆ (ใช้ mysqli_real_escape_string ป้องกัน SQL Injection)
 if (!empty($_GET['g'])) {
     $g = mysqli_real_escape_string($conn, $_GET['g']);
     $where_clauses[] = "g.name = '$g'";
@@ -24,12 +30,16 @@ if (!empty($_GET['ds'])) {
 }
 if (!empty($_GET['search'])) {
     $search = mysqli_real_escape_string($conn, $_GET['search']);
-    $where_clauses[] = "(s.fname LIKE '%$search%' OR s.lname LIKE '%$search%' OR s.cid LIKE '%$search%')";
+    $where_clauses[] = "(s.fname LIKE '%$search%' OR s.lname LIKE '%$search%' OR s.cid LIKE '%$search%' OR pos.name LIKE '%$search%')";
 }
 
-$where = " WHERE " . implode(" AND ", $where_clauses);
+// รวมเงื่อนไข WHERE
+$where = "";
+if (count($where_clauses) > 0) {
+    $where = " WHERE " . implode(" AND ", $where_clauses);
+}
 
-// 2. SQL Query (แก้ไขชื่อคอลัมน์ pre.name และลบคอมม่าที่เกินออก)
+// 3. SQL Query
 $sql = "SELECT s.*, 
                g.name AS g_name_j, 
                d.name AS d_name_j, 
@@ -51,10 +61,11 @@ $sql = "SELECT s.*,
 
 $result = mysqli_query($conn, $sql);
 
-// ตรวจสอบ Error ของ SQL ถ้ายังมีปัญหา
 if (!$result) {
     die("Error in SQL: " . mysqli_error($conn));
 }
+
+// --- ส่วน Header และ Table คงเดิมตามที่คุณเขียนมาได้เลยครับ ---
 
 // 3. ตั้งค่า Header
 $filename = "staff_report_" . date('Ymd_His') . ".xls";
@@ -78,7 +89,7 @@ header("Content-Disposition: attachment; filename=\"$filename\"");
                 <th>กลุ่มงาน</th>
                 <th>หน่วยงาน (ตาม จ)</th>
                 <th>กลุ่มงาน (ตาม จ)</th>
-                <th>หน่วยงาน (ตาม จ)</th>
+                <th>สถานที่ (ตาม จ)</th>
             
         </thead>
         <tbody>

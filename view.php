@@ -138,7 +138,6 @@ if (isset($_GET['id'])) {
                                 : '-'; 
                         ?>
                     </div>
-                    <!-- <div class="view-box"><?php echo ($row['birthday'] != '0000-00-00') ? date('d/m/Y', strtotime($row['birthday'])) : '-'; ?></div> -->
                 </div>
                 <div class="col-md-2">
                     <label>เลขที่ตำแหน่ง</label>
@@ -190,16 +189,27 @@ if (isset($_GET['id'])) {
                     <div class="view-box"><?php echo $row['dept_name']; ?></div>
                 </div>
                 
-                <div class="col-md-4">
+                <div class="col-md-2">
+                    <label>สถานะตาม จ</label>
+                    <div class="mt-2">
+                        <?php if(($row['status_s'] ?? 'Y') == 'Y'): ?>
+                            <span class="status-badge bg-yes"><i class="fas fa-link me-1"></i> ตาม จ</span>
+                        <?php else: ?>
+                            <span class="status-badge bg-no"><i class="fas fa-link-slash me-1"></i> ไม่ตาม จ</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
                     <label>กลุ่มงาน (ตาม จ)</label>
                     <div class="view-box text-muted"><?php echo $row['group_s_name'] ?: '-'; ?></div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label>หน่วยงาน (ตาม จ)</label>
                     <div class="view-box text-muted"><?php echo $row['dept_s_name'] ?: '-'; ?></div>
                 </div>
                 <div class="col-md-4">
-                    <label>สถานที่ปฏิบัติงาน (ตาม จ)</label>
+                    <label>สถานที่ปฏิบัติ (ตาม จ)</label>
                     <div class="view-box text-muted"><?php echo $row['workplace_s'] ?: '-'; ?></div>
                 </div>
             </div>
@@ -268,7 +278,6 @@ if (isset($_GET['id'])) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- footer -->
 <?php include('footer.php'); ?>
 
 </body>

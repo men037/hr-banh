@@ -243,100 +243,110 @@ if (isset($_GET['id'])) {
                 </div>
 
                 <div class="section-title"><i class="fas fa-hospital-user"></i> สังกัดและตำแหน่งงาน</div>
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <label>ประเภทบุคลากร</label>
-                        <select name="type_id" class="form-select">
-                            <?php 
-                            $res_type = mysqli_query($conn, "SELECT * FROM ref_type");
-                            while($t = mysqli_fetch_assoc($res_type)) {
-                                $sel = ($t['id'] == $row['type_id']) ? "selected" : "";
-                                echo "<option value='{$t['id']}' $sel>{$t['name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label>ตำแหน่งหลัก</label>
-                        <select name="position_id" class="form-select">
-                            <?php 
-                            $res_pos = mysqli_query($conn, "SELECT * FROM ref_position");
-                            while($pos = mysqli_fetch_assoc($res_pos)) {
-                                $sel = ($pos['id'] == $row['position_id']) ? "selected" : "";
-                                echo "<option value='{$pos['id']}' $sel>{$pos['name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label>ตำแหน่ง Provider</label>
-                        <select name="provider_pos_id" class="form-select">
-                            <option value="">-- เลือกตำแหน่ง --</option>
-                            <?php 
-                            $res_pv = mysqli_query($conn, "SELECT * FROM ref_provider_pos");
-                            while($pv = mysqli_fetch_assoc($res_pv)) {
-                                $sel = ($pv['id'] == $row['provider_pos_id']) ? "selected" : "";
-                                echo "<option value='{$pv['id']}' $sel>{$pv['name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                    <label> กลุ่มงาน</label>
-                        <select name="group_id" class="form-select">
-                            <?php 
-                            $res_g = mysqli_query($conn, "SELECT * FROM ref_group");
-                            while($g = mysqli_fetch_assoc($res_g)) {
-                                $sel = ($g['id'] == $row['group_id']) ? "selected" : "";
-                                echo "<option value='{$g['id']}' $sel>{$g['name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                    <label> หน่วยงาน</label>
-                        <select name="dept_id" class="form-select">
-                            <?php 
-                            $res_d = mysqli_query($conn, "SELECT * FROM ref_dept");
-                            while($d = mysqli_fetch_assoc($res_d)) {
-                                $sel = ($d['id'] == $row['dept_id']) ? "selected" : "";
-                                echo "<option value='{$d['id']}' $sel>{$d['name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-4 mt-2">
-                    <label> กลุ่มงาน (ตาม จ)</label>
-                        <select name="s_group_id" class="form-select">
-                            <option value="">-- เลือก --</option>
-                            <?php 
-                            $res_gs = mysqli_query($conn, "SELECT * FROM ref_group_s ORDER BY g_id ASC");
-                            while($gs = mysqli_fetch_assoc($res_gs)) {
-                                $sel = ($gs['g_id'] == $row['s_group_id']) ? "selected" : "";
-                                echo "<option value='{$gs['g_id']}' $sel>{$gs['g_name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mt-2">
-                    <label> หน่วยงาน (ตาม จ)</label>
-                        <select name="s_dept_id" class="form-select">
-                            <option value="">-- เลือก --</option>
-                            <?php 
-                            $res_ds = mysqli_query($conn, "SELECT * FROM ref_dept_s ORDER BY d_id ASC");
-                            while($ds = mysqli_fetch_assoc($res_ds)) {
-                                $sel = ($ds['d_id'] == $row['s_dept_id']) ? "selected" : "";
-                                echo "<option value='{$ds['d_id']}' $sel>{$ds['d_name']}</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mt-2">
-                    <label> สถานที่ปฏิบัติงาน (ตาม จ)</label>
-                        <input type="text" name="workplace_s" class="form-control" value="<?php echo $row['workplace_s']; ?>" placeholder="ระบุ">
-                    </div>
-                </div>
+<div class="row g-2 align-items-end"> <div class="col-md-4">
+        <label>ประเภทบุคลากร</label>
+        <select name="type_id" class="form-select">
+            <?php 
+            $res_type = mysqli_query($conn, "SELECT * FROM ref_type");
+            while($t = mysqli_fetch_assoc($res_type)) {
+                $sel = ($t['id'] == $row['type_id']) ? "selected" : "";
+                echo "<option value='{$t['id']}' $sel>{$t['name']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label>ตำแหน่งหลัก</label>
+        <select name="position_id" class="form-select">
+            <?php 
+            $res_pos = mysqli_query($conn, "SELECT * FROM ref_position");
+            while($pos = mysqli_fetch_assoc($res_pos)) {
+                $sel = ($pos['id'] == $row['position_id']) ? "selected" : "";
+                echo "<option value='{$pos['id']}' $sel>{$pos['name']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label>ตำแหน่ง Provider</label>
+        <select name="provider_pos_id" class="form-select">
+            <option value="">-- เลือกตำแหน่ง --</option>
+            <?php 
+            $res_pv = mysqli_query($conn, "SELECT * FROM ref_provider_pos");
+            while($pv = mysqli_fetch_assoc($res_pv)) {
+                $sel = ($pv['id'] == $row['provider_pos_id']) ? "selected" : "";
+                echo "<option value='{$pv['id']}' $sel>{$pv['name']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label>กลุ่มงาน</label>
+        <select name="group_id" class="form-select">
+            <?php 
+            $res_g = mysqli_query($conn, "SELECT * FROM ref_group");
+            while($g = mysqli_fetch_assoc($res_g)) {
+                $sel = ($g['id'] == $row['group_id']) ? "selected" : "";
+                echo "<option value='{$g['id']}' $sel>{$g['name']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label>หน่วยงาน</label>
+        <select name="dept_id" class="form-select">
+            <?php 
+            $res_d = mysqli_query($conn, "SELECT * FROM ref_dept");
+            while($d = mysqli_fetch_assoc($res_d)) {
+                $sel = ($d['id'] == $row['dept_id']) ? "selected" : "";
+                echo "<option value='{$d['id']}' $sel>{$d['name']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+
+    <div class="col-md-2 mt-2">
+        <label class="d-block">สถานะ จ <span class="text-danger">*</span></label>
+        <div class="status-toggle d-flex">
+            <input type="radio" name="status_s" id="sts_y" value="Y" <?php echo ($row['status_s'] == 'Y' || empty($row['status_s'])) ? 'checked' : ''; ?> required onclick="toggleStatusS()">
+            <label for="sts_y" class="lab-yes" style="min-width: 70px;"><i class="fas fa-check-circle"></i> ตาม</label>
+            
+            <input type="radio" name="status_s" id="sts_n" value="N" <?php echo ($row['status_s'] == 'N') ? 'checked' : ''; ?> onclick="toggleStatusS()">
+            <label for="sts_n" class="lab-no" style="min-width: 70px;"><i class="fas fa-times-circle"></i> ไม่ตาม</label>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mt-2">
+        <label>กลุ่มงานจริง (ตาม จ)</label>
+        <select name="s_group_id" id="s_group_id" class="form-select">
+            <option value="">-- เลือก --</option>
+            <?php 
+            $res_gs = mysqli_query($conn, "SELECT * FROM ref_group_s ORDER BY g_id ASC");
+            while($gs = mysqli_fetch_assoc($res_gs)) {
+                $sel = ($gs['g_id'] == $row['s_group_id']) ? "selected" : "";
+                echo "<option value='{$gs['g_id']}' $sel>{$gs['g_name']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+    <div class="col-md-3 mt-2">
+        <label>หน่วยงาน (ตาม จ)</label>
+        <select name="s_dept_id" id="s_dept_id" class="form-select">
+            <option value="">-- เลือก --</option>
+            <?php 
+            $res_ds = mysqli_query($conn, "SELECT * FROM ref_dept_s ORDER BY d_id ASC");
+            while($ds = mysqli_fetch_assoc($res_ds)) {
+                $sel = ($ds['d_id'] == $row['s_dept_id']) ? "selected" : "";
+                echo "<option value='{$ds['d_id']}' $sel>{$ds['d_name']}</option>";
+            }
+            ?>
+        </select>
+    </div>
+    <div class="col-md-4 mt-2">
+        <label>สถานที่ปฏิบัติงาน (ตาม จ)</label>
+        <input type="text" name="workplace_s" id="workplace_s" class="form-control" value="<?php echo $row['workplace_s']; ?>" placeholder="ระบุ">
+    </div>
+</div>
 
                 <div class="section-title mt-4"><i class="fas fa-cog"></i> สถานะและวันที่ปฏิบัติงาน</div>
                 <div class="row g-2">
@@ -441,6 +451,28 @@ function toggleWorkStatus() {
     }
 }
 document.addEventListener('DOMContentLoaded', toggleWorkStatus);
+function toggleStatusS() {
+    // ถ้าติ๊ก "ตาม" (sts_y) ให้ปิดช่องกรอกข้อมูล
+    const isFollow = document.getElementById('sts_y').checked;
+    const fields = ['s_group_id', 's_dept_id', 'workplace_s'];
+    
+    fields.forEach(id => {
+        const field = document.getElementById(id);
+        if (isFollow) {
+            field.disabled = true;
+            field.classList.add('bg-readonly'); // เพิ่มสีเทา
+        } else {
+            field.disabled = false;
+            field.classList.remove('bg-readonly'); // คืนค่าสีขาว
+        }
+    });
+}
+
+// เรียกใช้งานตอนโหลดหน้าครั้งแรกเพื่อให้สถานะเริ่มต้นถูกต้อง
+document.addEventListener('DOMContentLoaded', function() {
+    toggleStatusS();
+    toggleWorkStatus(); // เรียกของเดิมด้วย
+});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

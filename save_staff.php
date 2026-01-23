@@ -50,6 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // 7. ข้อมูลสถานะ
     $provider_status = isset($_POST['provider_status']) ? $_POST['provider_status'] : 'N';
     $ekyc_status = isset($_POST['ekyc_status']) ? $_POST['ekyc_status'] : 'N';
+    
+    // ✅ --- เพิ่มการรับค่าสถานะตาม จ (status_s) ---
+    $status_s = isset($_POST['status_s']) ? mysqli_real_escape_string($conn, $_POST['status_s']) : 'Y';
 
     // 8. ตรวจสอบเลขบัตรประชาชนซ้ำ
     $check = mysqli_query($conn, "SELECT cid FROM staff_main WHERE cid = '$cid'");
@@ -68,29 +71,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // 9. คำสั่ง SQL INSERT (เพิ่มฟิลด์ ed_id เข้าไปใน Query)
+    // 9. คำสั่ง SQL INSERT (เพิ่มฟิลด์ status_s เข้าไปใน Query)
+ // 9. คำสั่ง SQL INSERT (ตรวจสอบลำดับฟิลด์และค่าให้ตรงกัน)
     $sql = "INSERT INTO staff_main (
-                cid, staff_id, license_no, fname, lname, position_no,
-                gender_id, prefix_id, prefix_academic_id, type_id, ed_id,
-                position_id, provider_pos_id, group_id, dept_id, 
-                s_group_id, s_dept_id, workplace_s,
-                birthday, start_date, 
-                provider_status, ekyc_status,  
+                cid, 
+                staff_id, 
+                license_no, 
+                fname, 
+                lname, 
+                position_no,        -- ตรวจสอบตำแหน่งนี้
+                gender_id, 
+                prefix_id, 
+                prefix_academic_id, 
+                type_id, 
+                ed_id,              -- ตรวจสอบตำแหน่งนี้
+                position_id, 
+                provider_pos_id, 
+                group_id, 
+                dept_id, 
+                status_s,           -- ฟิลด์ที่เพิ่มใหม่
+                s_group_id, 
+                s_dept_id, 
+                workplace_s,
+                birthday, 
+                start_date, 
+                provider_status, 
+                ekyc_status,   
                 updated_at
             ) VALUES (
-                '$cid', '$staff_id', '$license_no', '$fname', '$lname', '$position_no',
-                $gender_id, '$prefix_id', $prefix_academic_id, $type_id, $ed_id,
-                '$position_id', '$provider_pos_id', '$group_id', '$dept_id', 
-                $s_group_id, $s_dept_id, '$workplace_s',
-                $birthday, $start_date,
-                '$provider_status', '$ekyc_status',  
+                '$cid', 
+                '$staff_id', 
+                '$license_no', 
+                '$fname', 
+                '$lname', 
+                '$position_no',     -- ค่าต้องตรงกับตำแหน่งข้างบน
+                $gender_id, 
+                '$prefix_id', 
+                $prefix_academic_id, 
+                $type_id, 
+                $ed_id,             -- ค่าต้องตรงกับตำแหน่งข้างบน
+                '$position_id', 
+                '$provider_pos_id', 
+                '$group_id', 
+                '$dept_id', 
+                '$status_s', 
+                $s_group_id, 
+                $s_dept_id, 
+                '$workplace_s',
+                $birthday, 
+                $start_date,
+                '$provider_status', 
+                '$ekyc_status',  
                 '$updated_at'
             )";
 
     if (mysqli_query($conn, $sql)) {
         
         // ✅ --- บันทึก LOG การเพิ่มข้อมูล ---
-        $log_details = "เพิ่มเจ้าหน้าที่ใหม่: $fname $lname (รหัส: $staff_id)";
+        $log_details = "เพิ่มเจ้าหน้าที่ใหม่: $fname $lname (รหัส: $staff_id, สถานะ จ: $status_s)";
         write_log($conn, 'ADD', 'staff_main', $staff_id, $log_details);
         // ------------------------------------------
 
