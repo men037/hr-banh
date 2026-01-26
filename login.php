@@ -88,7 +88,7 @@
             <button type="submit" class="btn btn-login w-100 mb-3 shadow-sm">เข้าสู่ระบบ</button>
             
             <div class="text-center">
-                <hr class="text-pink opacity-25">
+                
                 <small class="text-muted">
                     <i class="fas fa-headset me-1"></i> พบปัญหาการใช้งาน ติดต่องานเทคโนโลยีสารสนเทศ 
                     
@@ -100,7 +100,7 @@
 
 <div class="text-center mt-auto pt-2 border-top">
     <p class="small text-footer mb-1">
-        © 2025 โรงพยาบาลบ้านนา สงวนลิขสิทธิ์
+        © 2026 โรงพยาบาลบ้านนา สงวนลิขสิทธิ์
     </p>
 </div>
     </div>

@@ -24,7 +24,12 @@ while($rg = mysqli_fetch_assoc($res_gen)) {
     if($rg['gender_id'] == 1) $genderData[0] = $rg['total'];
     if($rg['gender_id'] == 2) $genderData[1] = $rg['total'];
 }
-
+// // ในไฟล์ dashboard_charts.php
+// if (!function_exists('getChartData')) {
+//     function getChartData($conn, $table, $labelCol) {
+//         // ... โค้ดของคุณ ...
+//     }
+// }
 // 3. ข้อมูล 7 กล่องวิชาชีพ
 $pso_list = [   'A0003'=>'เภสัชกร',
                 'A0002'=>'ทันตแพทย์',
@@ -239,7 +244,7 @@ foreach($types as $type_id => $type_name) {
         </div>
     </div>
 </div>
-
+ <?php include('footer.php'); ?>
 </div>
 
 <!-- doughnut -->
