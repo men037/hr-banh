@@ -158,8 +158,11 @@ $show_all = (isset($_GET['show_all']) && $_GET['show_all'] == '1');
                                     <td><span class="badge <?php echo $st_class; ?>"><?php echo $st_text; ?></span></td>
                                     <td data-gname="<?php echo $row['gname']; ?>" data-dname="<?php echo $row['dname']; ?>">
                                         <div class="d-flex flex-column">
-                                            <span class="text-secondary small"><?php echo $row['gname'] ?? '-'; ?></span>
-                                            <strong class="text-dark"><?php echo $row['dname'] ?? '-'; ?></strong>
+                                            
+                                            <span class="text-secondary small"><i class="fa-solid fa-layer-group me-1 text-secondary" style="font-size: 0.8rem;"></i>
+                                            <?php echo $row['gname'] ?? '-'; ?></span>
+                                            <strong class="text-dark"><i class="fa-solid fa-house-medical me-1 text-info" style="font-size: 0.8rem;"></i>
+                                            <?php echo $row['dname'] ?? '-'; ?></strong>
                                         </div>
                                     </td>
                                     <td data-gname-s="<?php echo $row['gname_s']; ?>" data-dname-s="<?php echo $row['dname_s']; ?>">

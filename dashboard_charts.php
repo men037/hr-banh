@@ -121,6 +121,7 @@ foreach($types as $type_id => $type_name) {
     .stat-label { font-size: 0.9rem; color: #34495e; font-weight: bold; margin-top: 10px; }
     .stat-sub { font-size: 0.75rem; color: #95a5a6; margin-top: 5px; }
     .stat-img { width: 55px; height: 55px; margin-bottom: 10px; }
+    .navbar { background: linear-gradient(90deg, #ff85a2 0%, #ffb3c1 100%); }
     
     /* กล่องบนสุดพิเศษ */
     .hero-stat-card {
@@ -134,16 +135,32 @@ foreach($types as $type_id => $type_name) {
     
 </style>
 
-<div class="container mt-4 mb-5">
+<nav class="navbar navbar-dark mb-4 shadow-sm" style="border-radius: 15px;">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="index.php">ระบบวิเคราะห์ข้อมูลบุคลากร</a>
+        </div>
+    </nav>
+
+<!-- <div class="container mt-4 mb-5">
     <div class="text-center mb-5">
         <h2 class="fw-bold text-dark">📊 ระบบวิเคราะห์ข้อมูลบุคลากร</h2>
-    </div>
+    </div> -->
 
-    <div class="row mb-4 justify-content-center">
+    <!-- <div class="row mb-4 justify-content-center">
     <div class="col-md-4"> 
         <div class="hero-stat-card text-center py-3" style="padding: 15px !important;">
             <i class="fas fa-users fa-2x mb-2"></i> <h6 class="fw-bold opacity-75 mb-1">จำนวนบุคลากรทั้งหมด</h6>
             <div class="display-5 fw-bold"><?php echo number_format($total_staff); ?></div> <p class="small mb-0 opacity-75">คน (สถานะปกติ)</p> </div>
+    </div>
+</div> -->
+
+<div class="row mb-3 justify-content-center">
+    <div class="col-md-3 col-sm-6"> 
+        <div class="hero-stat-card text-center py-2" style="padding: 10px !important; min-height: auto;">
+            <h6 class="fw-bold opacity-75 mb-1" style="font-size: 0.9rem;">จำนวนบุคลากรทั้งหมด</h6>
+            <div class="display-5 fw-bold"><?php echo number_format($total_staff); ?>          
+            <p class="small mb-0 opacity-75" style="font-size: 0.75rem;">คน (สถานะปกติ)</p> 
+        </div>
     </div>
 </div>
 

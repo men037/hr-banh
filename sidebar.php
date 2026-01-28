@@ -124,10 +124,14 @@ function isActive($filenames) {
 
 <div class="sidebar">
     <a href="index.php" class="sidebar-brand text-decoration-none">
-        <div class="brand-icon"><i class="fa-solid fa-hospital"></i></div>
+    <div  style="background: none !important; padding: 0;">
+    <!-- <div class="brand-icon" style="background: none !important; padding: 0;"> -->
+    <img src="img/logo.png" alt="Logo" style="width: 50px; height: auto;"> 
+    </div>
+    
         <div class="brand-text">
             <b>Staff System</b>
-            <small>รพ.บ้านนา Management</small>
+            <small>โรงพยาบาลบ้านนา</small>
         </div>
     </a>
     
@@ -165,9 +169,18 @@ function isActive($filenames) {
     <div class="sidebar-footer mt-auto">
         <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
         <div class="flex-grow-1 overflow-hidden" style="font-size: 0.85rem;">
-            <span class="d-block text-truncate fw-bold" style="color:#333;">   </span>
-            <a href="logout.php" class="text-muted text-decoration-none" style="font-size: 0.75rem;">ออกจากระบบ</a>
+            <!-- <span class="d-block text-truncate fw-bold" style="color:#333;">ผู้ใช้งาน</span> -->
+            <a href="logout.php" class="text-muted text-decoration-none" style="font-size: 1.00 rem;">ออกจากระบบ</a>
         </div>
+
+        <!-- <div class="sidebar-footer mt-auto">
+    <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+    <div class="flex-grow-1 overflow-hidden" style="font-size: 0.85rem;">
+        <span class="d-block text-truncate fw-bold" style="color:#333;">ผู้ใช้งาน</span>
+        <a href="logout.php" class="text-muted text-decoration-none" style="font-size: 0.75rem;">ออกจากระบบ</a>
+    </div>
+</div> -->
+
         <a href="logout.php" class="text-secondary" onclick="return confirm('ออกจากระบบ?')">
             <i class="fa-solid fa-right-from-bracket"></i>
         </a>
