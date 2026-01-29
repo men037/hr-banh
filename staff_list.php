@@ -231,115 +231,100 @@ $show_all = isset($_GET['show_all']) && $_GET['show_all'] == '1';
 
 <script>
 $(document).ready(function() {
-    // 1. ประกาศ DataTable
+    // ฟังก์ชันสำหรับจัดการ LocalStorage เพื่อจำค่า
+    const setStored = (id, val) => localStorage.setItem('staff_filter_cache_' + id, val);
+    const getStored = (id) => localStorage.getItem('staff_filter_cache_' + id) || "";
+
     var table = $('#staffTable').DataTable({
         "stateSave": true,
         "language": { "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/th.json" },
         "pageLength": 10,
-        "order": [], // เรียงตาม SQL
+        "order": [],
         "stateLoadParams": function (settings, data) {
-            data.order = []; // บังคับไม่ให้โหลดสถานะการเรียงเก่าจาก Browser
+            data.order = []; 
         },
         initComplete: function () {
             var api = this.api();
 
-            // --- จัดการย้ายตำแหน่งตัวกรอง ---
             var searchWrapper = $('#staffTable_filter');
             if (searchWrapper.length) {
                 $('#filter_container').prependTo(searchWrapper).show();
                 searchWrapper.addClass('d-flex align-items-center justify-content-end gap-2 flex-wrap');
-                searchWrapper.find('label').addClass('mb-0');
-            } else {
-                $('#filter_container').show();
             }
 
             // --- ดึงข้อมูลใส่ Dropdown ---
-            api.column(1).nodes().to$().find('.gname-text').each(function() {
-                var txt = $(this).text().trim();
-                if (txt && txt !== '-' && $("#filter_gname option[value='" + txt + "']").length === 0) {
-                    $('#filter_gname').append('<option value="' + txt + '">' + txt + '</option>');
+            api.cells(null, 1).nodes().to$().each(function() {
+                var g = $(this).find('.gname-text').text().trim();
+                var d = $(this).find('.dname-text').text().trim();
+                if (g && g !== '-' && $("#filter_gname option[value='" + g + "']").length === 0) {
+                    $('#filter_gname').append(new Option(g, g));
                 }
-            });
-
-            api.column(1).nodes().to$().find('.dname-text').each(function() {
-                var txt = $(this).text().trim();
-                if (txt && txt !== '-' && $("#filter_dname option[value='" + txt + "']").length === 0) {
-                    $('#filter_dname').append('<option value="' + txt + '">' + txt + '</option>');
+                if (d && d !== '-' && $("#filter_dname option[value='" + d + "']").length === 0) {
+                    $('#filter_dname').append(new Option(d, d));
                 }
             });
 
             sortDropdown('#filter_gname');
             sortDropdown('#filter_dname');
 
-            // --- คืนค่าจาก State ที่จำไว้ ---
-            var state = api.state.loaded();
-            if (state) {
-                var colSearch = state.columns[1].search.search;
-                if (colSearch) {
-                    if (colSearch.includes('(?=.*')) {
-                        var matches = colSearch.match(/\(\?\=\.\*([^\)]+)\)/g);
-                        if (matches) {
-                            matches.forEach(function(m) {
-                                var val = m.replace('(?=.*', '').replace(')', '');
-                                if ($("#filter_gname option[value='" + val + "']").length > 0) $('#filter_gname').val(val);
-                                if ($("#filter_dname option[value='" + val + "']").length > 0) $('#filter_dname').val(val);
-                            });
-                        }
-                    } else {
-                        if ($("#filter_gname option[value='" + colSearch + "']").length > 0) $('#filter_gname').val(colSearch);
-                        if ($("#filter_dname option[value='" + colSearch + "']").length > 0) $('#filter_dname').val(colSearch);
-                    }
-                }
-            }
+            // --- [สำคัญ] คืนค่าตัวกรองที่เคยเลือกไว้จาก Cache ---
+            $('#filter_gname').val(getStored('gname'));
+            $('#filter_dname').val(getStored('dname'));
+            
+            // สั่งให้ตารางกรองข้อมูลตามค่าที่ดึงกลับมาทันที
+            table.draw();
             updateExportLink();
         }
     });
 
-    // 2. การเปลี่ยนค่าตัวกรอง
+    // ระบบ Filter Logic (เปรียบเทียบค่าตรงตัว ===)
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        var filterG = $('#filter_gname').val();
+        var filterD = $('#filter_dname').val();
+
+        var row = $(settings.aoData[dataIndex].nTr);
+        var rowG = row.find('.gname-text').text().trim();
+        var rowD = row.find('.dname-text').text().trim();
+
+        var matchG = !filterG || rowG === filterG;
+        var matchD = !filterD || rowD === filterD;
+
+        return matchG && matchD;
+    });
+
+    // เมื่อเปลี่ยนค่าตัวกรอง
     $('#filter_gname, #filter_dname').on('change', function() {
-        var gname = $('#filter_gname').val();
-        var dname = $('#filter_dname').val();
-        if (gname && dname) {
-            var searchStr = '(?=.*' + gname + ')(?=.*' + dname + ')';
-            table.column(1).search(searchStr, true, false).draw();
-        } else if (gname) {
-            table.column(1).search(gname).draw();
-        } else if (dname) {
-            table.column(1).search(dname).draw();
-        } else {
-            table.column(1).search('').draw();
-        }
+        // บันทึกค่าลง Cache ตาม ID
+        var id = $(this).attr('id').replace('filter_', '');
+        setStored(id, $(this).val());
+        
+        table.draw();
         updateExportLink();
     });
 
-    // 3. ปุ่มรีเฟรชตัวกรอง
+    // ปุ่มรีเฟรช (ต้องล้าง Cache ด้วย)
     $(document).on('click', '#btn_refresh_filter', function() {
-        $('#filter_gname').val('');
-        $('#filter_dname').val('');
+        $('#filter_gname, #filter_dname').val('');
+        setStored('gname', '');
+        setStored('dname', '');
+        
         table.search('').columns().search('').draw();
         updateExportLink();
     });
 
-    table.on('search.dt', function() { updateExportLink(); });
-
-    // --- ฟังก์ชันเสริม ---
-    function updateExportLink() {
-        var gname = $('#filter_gname').val() || '';
-        var dname = $('#filter_dname').val() || '';
-        var search_val = $('#staffTable_filter input').val() || ''; 
-        var params = [];
-        if(gname) params.push('group_name=' + encodeURIComponent(gname));
-        if(dname) params.push('dept_name=' + encodeURIComponent(dname));
-        if(search_val) params.push('search_name=' + encodeURIComponent(search_val));
-        var finalUrl = 'export_excel2.php?' + params.join('&');
-        $('#btnExport').attr('href', finalUrl);
-    }
-
     function sortDropdown(selectId) {
         var cl = $(selectId);
         var opts = cl.find('option:not(:first-child)');
-        opts.sort(function(a, b) { return $(a).text().localeCompare($(b).text(), 'th'); });
+        opts.sort((a, b) => $(a).text().localeCompare($(b).text(), 'th'));
         cl.append(opts);
+    }
+
+    function updateExportLink() {
+        var gname = $('#filter_gname').val() || '';
+        var dname = $('#filter_dname').val() || '';
+        var search_val = $('.dataTables_filter input').val() || ''; 
+        var params = $.param({ group_name: gname, dept_name: dname, search_name: search_val });
+        $('#btnExport').attr('href', 'export_excel2.php?' + params);
     }
 });
 </script>

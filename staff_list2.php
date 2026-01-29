@@ -275,12 +275,25 @@ $(document).ready(function() {
         table.page.len(this.value).draw();
     });
 // 3. ปุ่มรีเฟรชตัวกรอง
-    $(document).on('click', '#btn_refresh_filter', function() {
-        $('#filter_gname').val('');
-        $('#filter_dname').val('');
-        table.search('').columns().search('').draw();
-        updateExportLink();
+$(document).on('click', '#btn_refresh_filter', function() {
+    // 1. ล้างค่าใน Dropdown ทุกตัวบนหน้าจอ
+    $('.filter-item select').val('');
+    $('#customSearch').val('');
+
+    // 2. ล้างค่าที่จำไว้ใน LocalStorage (ต้องลบออกให้หมด)
+    ['gname', 'dname', 'gname_s', 'dname_s'].forEach(id => {
+        localStorage.removeItem('staff_filter_' + id);
     });
+
+    // 3. ล้าง State ของ DataTable (เช่น หน้าที่ค้างอยู่ หรือการเรียงลำดับ)
+    table.state.clear();
+
+    // 4. สั่งให้ตารางค้นหาเป็นค่าว่างและวาดใหม่
+    table.search('').columns().search('').draw();
+    
+    // 5. เรียกใช้ฟังก์ชันอัปเดตลิงก์ (เช็คชื่อฟังก์ชันให้ตรงกับด้านล่าง)
+    updateExport(); 
+});
     
     function updateExport() {
         const params = $.param({
