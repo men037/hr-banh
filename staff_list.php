@@ -156,12 +156,13 @@ $show_all = isset($_GET['show_all']) && $_GET['show_all'] == '1';
                     <tbody>
                         <?php
                         if ($conn) {
-                            $sql = "SELECT s.*, g.name as gname, d.name as dname, pos.name as posname, t.name as tname 
+                            $sql = "SELECT s.*, g.name as gname, d.name as dname, pos.name as posname, t.name as tname, f.name as prefix
                                     FROM staff_main s 
                                     LEFT JOIN ref_group g ON s.group_id = g.id 
                                     LEFT JOIN ref_dept d ON s.dept_id = d.id
                                     LEFT JOIN ref_position pos ON s.position_id = pos.id
-                                    LEFT JOIN ref_type t ON s.type_id = t.id";
+                                    LEFT JOIN ref_type t ON s.type_id = t.id
+                                    LEFT JOIN ref_prefix f ON s.prefix_id = f.id";
                             
                             if (!$show_all) { $sql .= " WHERE s.work_status = 'Y'"; }
                             $sql .= " ORDER BY s.group_id ASC,s.dept_id ASC,s.staff_id ASC ";
@@ -185,7 +186,7 @@ $show_all = isset($_GET['show_all']) && $_GET['show_all'] == '1';
                                         </div>
                                     </div>
                                 </td>
-                                <td><small class="fw-bold"><?php echo $row['fname']." ".$row['lname']; ?></small></td>
+                                <td><small class="fw-bold"><?php echo $row['prefix']."".$row['fname']." ".$row['lname']; ?></small></td>
                                 <td><small><?php echo $row['posname'] ?? '-'; ?></small></td>
                                 <td><small><?php echo $row['tname'] ?? '-'; ?></small></td>
                                 <td class="text-center status-icon">

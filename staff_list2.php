@@ -139,14 +139,15 @@ $show_all = (isset($_GET['show_all']) && $_GET['show_all'] == '1');
                             <?php
                             $where_sql = $show_all ? "" : " WHERE s.work_status = 'Y' ";
                             $sql = "SELECT s.*, g.NAME AS gname, d.NAME AS dname, pos.NAME AS posname, 
-                                           t.NAME AS tname, ds.d_name AS dname_s, gs.g_name AS gname_s
+                                           t.NAME AS tname, ds.d_name AS dname_s, gs.g_name AS gname_s, f.name as prefix
                                     FROM staff_main s
                                     LEFT JOIN ref_group g ON s.group_id = g.id
                                     LEFT JOIN ref_dept d ON s.dept_id = d.id
                                     LEFT JOIN ref_position pos ON s.position_id = pos.id
                                     LEFT JOIN ref_type t ON s.type_id = t.id 
                                     LEFT JOIN ref_dept_s ds ON ds.d_id = s.s_dept_id
-                                    LEFT JOIN ref_group_s gs ON gs.g_id = s.s_group_id" 
+                                    LEFT JOIN ref_group_s gs ON gs.g_id = s.s_group_id
+                                    LEFT JOIN ref_prefix f ON s.prefix_id = f.id " 
                                     . $where_sql;
 
                             $result = mysqli_query($conn, $sql);
@@ -171,7 +172,7 @@ $show_all = (isset($_GET['show_all']) && $_GET['show_all'] == '1');
                                             <strong class="text-dark"><?php echo $row['dname_s'] ?? '-'; ?></strong>
                                         </div>
                                     </td>
-                                    <td><small class="fw-bold"><?php echo $row['fname']." ".$row['lname']; ?></small></td>
+                                    <td><small class="fw-bold"><?php echo $row['prefix']."".$row['fname']." ".$row['lname']; ?></small></td>
                                     <td><small><?php echo $row['posname'] ?? '-'; ?></small></td>
                                     <td><small><?php echo $row['tname'] ?? '-'; ?></small></td>
                                     <td class="text-center">
