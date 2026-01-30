@@ -374,7 +374,7 @@ if (isset($_GET['id'])) {
                                     <input type="date" name="end_date" id="end_date" class="form-control" value="<?php echo $row['end_date']; ?>">
                                 </div>
                                 <div class="col-md-6">
-                                    <label id="reason_label">เหตุผลที่พ้นสภาพ</label>
+                                    <label id="reason_label">เหตุผล</label>
                                     <select name="leave_reason_id" id="leave_reason_id" class="form-select">
                                         <option value="">-- เลือกเหตุผล --</option>
                                         <?php 

@@ -242,7 +242,7 @@ if (isset($_GET['id'])) {
                     <div class="view-box bg-light"><?php echo date('d/m/Y', strtotime($row['end_date'])); ?></div>
                 </div>
                 <div class="col-md-3">
-                    <label>เหตุผลที่พ้นสภาพ</label>
+                    <label>เหตุผล</label>
                     <div class="view-box bg-light"><?php echo $row['leave_reason']; ?></div>
                 </div>
                 <?php endif; ?>
