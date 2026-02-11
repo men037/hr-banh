@@ -90,7 +90,7 @@ $show_all = isset($_GET['show_all']) && $_GET['show_all'] == '1';
 
     <nav class="navbar navbar-dark mb-4 shadow-sm" style="border-radius: 15px;">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="index.php">รายชื่อเจ้าหน้าที่</a>
+            <a class="navbar-brand fw-bold" href="index.php"><i class="fa-solid fa-address-book"></i> รายชื่อเจ้าหน้าที่</a>
         </div>
     </nav>
 

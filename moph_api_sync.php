@@ -36,6 +36,10 @@ $sql = "SELECT
         ORDER BY sm.staff_id ASC";
 
 $result = mysqli_query($conn, $sql);
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -65,16 +69,28 @@ $result = mysqli_query($conn, $sql);
         .navbar { background: linear-gradient(90deg, #ff85a2 0%, #ffb3c1 100%); border-radius: 15px; }
         .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(255, 133, 162, 0.1); }
         .table-pink thead { background-color: #ffdae3; color: #ff85a2; }
-        .status-log { 
-            height: 250px; 
-            overflow-y: auto; 
-            background: #2d2d2d; 
-            color: #00ff00; 
-            padding: 15px; 
-            border-radius: 12px; 
-            font-family: 'Courier New', monospace; 
-            font-size: 13px;
-        }
+        .status-log {
+        height: 300px;
+        overflow-y: auto;
+        background: #1e1e1e !important; /* พื้นหลังดำเข้ม */
+        color: #dcdcdc;
+        padding: 15px;
+        border-radius: 12px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        border: 2px solid #333;
+    }
+    .log-line {
+        border-bottom: 1px solid #2d2d2d;
+        padding-bottom: 2px;
+    }
+    /* สีของข้อความใน Log */
+    .text-success { color: #4caf50 !important; } /* เขียว */
+    .text-danger { color: #f44336 !important; }  /* แดง */
+    .text-warning { color: #ffeb3b !important; } /* เหลือง */
+    .text-info { color: #00bcd4 !important; }    /* ฟ้า */
+    .text-muted { color: #888 !important; }      /* เทา */
         
         .btn-config {
             background-color: rgba(255,255,255,0.2);
@@ -99,16 +115,16 @@ $result = mysqli_query($conn, $sql);
     <nav class="navbar navbar-dark mb-4 shadow-sm">
         <div class="container-fluid d-flex justify-content-between">
             <span class="navbar-brand fw-bold">
-                <i class="fa-solid fa-cloud-arrow-up me-2"></i> MOPH API Sync (PHR1)
+                <i class="fa-solid fa-cloud-arrow-up me-2"></i> MOPH API Sync (IDPADMIN)
             </span>
             <div class="d-flex gap-2">
                 <?php if($status_mode == 'Y'): ?>
                     <a href="?mode=N" class="btn btn-sm btn-light text-danger fw-bold">
-                        <i class="fa-solid fa-user-slash me-1"></i> รายชื่อพ้นสภาพ (N)
+                        <i class="fa-solid fa-user-slash me-1"></i> แสดงเฉพาะที่ใช้งาน
                     </a>
                 <?php else: ?>
                     <a href="?mode=Y" class="btn btn-sm btn-light text-success fw-bold">
-                        <i class="fa-solid fa-user-check me-1"></i> รายชื่อปกติ (Y)
+                        <i class="fa-solid fa-user-check me-1"></i> แสดงรายชื่อทั้งหมด
                     </a>
                 <?php endif; ?>
                 <button class="btn btn-sm btn-config" type="button" data-bs-toggle="collapse" data-bs-target="#apiConfigSection">
@@ -145,12 +161,26 @@ $result = mysqli_query($conn, $sql);
                         <h5 class="fw-bold mb-0 text-secondary border-bottom pb-2">
                             รายชื่อเจ้าหน้าที่พนักงาน (สถานะ: <?php echo $status_mode == 'Y' ? 'ปกติ' : 'พ้นสภาพ'; ?>)
                         </h5>
-                        <div class="search-box">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="ค้นหาชื่อ, CID, ตำแหน่ง...">
-                        </div>
-                    </div>
 
+                        <div class="d-flex gap-2">
+                            <button id="btnSyncAll" class="btn btn-sm btn-success px-3">
+                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Sync All
+                            </button>
+                            
+                            <button id="btnRetrieve" class="btn btn-sm btn-primary px-3" title="ดึงข้อมูลจาก MOPH มาเก็บในตารางสำรอง">
+                                <i class="fa-solid fa-cloud-arrow-down me-1"></i> Retrieve Data
+                            </button>
+
+                            <button id="btnRefresh" class="btn btn-sm btn-outline-secondary px-3" title="โหลดข้อมูลใหม่">
+                                <i class="fa-solid fa-rotate"></i>
+                            </button>
+                            
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="ค้นหาชื่อ, CID, ตำแหน่ง...">
+                            </div>
+                        </div>
+                        </div>
                     <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
                         <table class="table table-hover align-middle" id="staffTable">
                             <thead class="sticky-top bg-white">
@@ -180,14 +210,21 @@ $result = mysqli_query($conn, $sql);
                                             : '<i class="fa-solid fa-circle-xmark text-danger opacity-50" title="Inactive"></i>'; ?>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-primary btn-sync px-3" 
-                                            data-staff='<?php echo json_encode($row, JSON_UNESCAPED_UNICODE); ?>'>
-                                            <i class="fa-solid fa-rotate me-1"></i> Sync
-                                        </button>
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <button class="btn btn-sm btn-primary btn-sync" 
+                                                data-staff='<?php echo json_encode($row, JSON_UNESCAPED_UNICODE); ?>' title="ส่งข้อมูลเข้า MOPH">
+                                                <i class="fa-solid fa-rotate"></i> Sync
+                                            </button>
+                                            
+                                            <a href="edit.php?id=<?php echo $row['cid']; ?>&return_to=moph_api_sync.php" 
+                                            class="btn btn-sm btn-outline-warning" title="แก้ไขข้อมูลพื้นฐาน">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endwhile; ?>
-                                <tr id="noData" style="display:none;"><td colspan="5" class="text-center py-4 text-muted">ไม่พบข้อมูล...</td></tr>
+                                <tr id="noData" style="display:none;"><td colspan="6" class="text-center py-4 text-muted">ไม่พบข้อมูล...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -211,9 +248,13 @@ $result = mysqli_query($conn, $sql);
 
 <script>
 $(document).ready(function() {
+    // 1. จัดการ Token และ LocalStorage
     $('#api_token').val(localStorage.getItem('moph_token') || '');
-    $('#api_token').on('input', function() { localStorage.setItem('moph_token', $(this).val().trim()); });
+    $('#api_token').on('input', function() { 
+        localStorage.setItem('moph_token', $(this).val().trim()); 
+    });
 
+    // 2. ระบบค้นหา (Search Filter)
     $("#searchInput").on("keyup", function() {
         var value = $(this).val().toLowerCase();
         var visibleRows = 0;
@@ -225,19 +266,31 @@ $(document).ready(function() {
         visibleRows === 0 && value !== "" ? $("#noData").show() : $("#noData").hide();
     });
 
-    $('.btn-sync').click(function() {
-        const btn = $(this);
+    // 3. ฟังก์ชันสำหรับจัดการ Log สีสันสวยงาม
+    function appendLog(msg) {
+        const log = $('#log_output');
+        const time = new Date().toLocaleTimeString();
+        
+        let colorClass = 'text-info'; 
+        if (msg.includes('✅')) colorClass = 'text-success';
+        if (msg.includes('❌') || msg.includes('🚫')) colorClass = 'text-danger';
+        if (msg.includes('⚠️') || msg.includes('🚀') || msg.includes('🎬') || msg.includes('📡') || msg.includes('🔄')) colorClass = 'text-warning';
+
+        const logItem = `
+            <div class="log-line mb-1">
+                <span class="text-muted small">[${time}]</span> 
+                <span class="${colorClass}">${msg}</span>
+            </div>`;
+
+        log.append(logItem);
+        log.animate({ scrollTop: log[0].scrollHeight }, 100);
+    }
+
+    // 4. ฟังก์ชันหลักในการส่ง API (Single Sync)
+    function syncSingleRow(btn, token, callback = null) {
         const staffData = btn.data('staff');
-        const token = $('#api_token').val().trim();
-
-        if(!token) {
-            bootstrap.Collapse.getOrCreateInstance('#apiConfigSection').show();
-            alert('กรุณาใส่ Token ก่อนครับ');
-            return;
-        }
-
         btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
-        appendLog(`🚀 [${staffData.cid}] ส่งข้อมูล: ${staffData.first_name}...`);
+        appendLog(`📡 [${staffData.cid}] กำลังส่ง: ${staffData.first_name}...`);
 
         $.ajax({
             url: 'process_moph_api.php',
@@ -247,29 +300,117 @@ $(document).ready(function() {
                 try {
                     const res = JSON.parse(response);
                     if(res.status === 200) {
-                        appendLog(`✅ สำเร็จ: ${res.message}`);
+                        appendLog(`✅ สำเร็จ: ${staffData.first_name}`);
                         btn.removeClass('btn-primary').addClass('btn-success').html('<i class="fa-solid fa-check"></i>');
                     } else {
-                        appendLog(`❌ ผิดพลาด (${res.status}): ${res.message}`);
+                        appendLog(`❌ ผิดพลาด [${staffData.first_name}]: ${res.message}`);
                         btn.prop('disabled', false).addClass('btn-danger').html('<i class="fa-solid fa-triangle-exclamation"></i>');
                     }
                 } catch(e) {
-                    appendLog(`⚠️ JSON Error: ${response}`);
+                    appendLog(`⚠️ JSON Error: ${staffData.first_name}`);
                     btn.prop('disabled', false).html('Err');
                 }
+                if (callback) callback();
             },
             error: function() {
-                appendLog(`🚫 Connection Failed`);
+                appendLog(`🚫 Connection Failed: ${staffData.first_name}`);
                 btn.prop('disabled', false).html('Error');
+                if (callback) callback();
+            }
+        });
+    }
+
+    // 5. ปุ่ม Sync รายบุคคล
+    $(document).on('click', '.btn-sync', function() {
+        const token = $('#api_token').val().trim();
+        if(!token) {
+            bootstrap.Collapse.getOrCreateInstance('#apiConfigSection').show();
+            alert('กรุณาใส่ Token ก่อนครับ');
+            return;
+        }
+        syncSingleRow($(this), token);
+    });
+
+    // 6. ปุ่ม Sync All
+    $('#btnSyncAll').click(async function() {
+        const token = $('#api_token').val().trim();
+        if (!token) {
+            bootstrap.Collapse.getOrCreateInstance('#apiConfigSection').show();
+            alert('กรุณาใส่ Token ก่อนครับ');
+            return;
+        }
+        const visibleButtons = $('#tableBody tr:visible').find('.btn-sync').not('.btn-success');
+        if (visibleButtons.length === 0) {
+            alert('ไม่พบรายชื่อที่ต้องการ Sync');
+            return;
+        }
+        if (!confirm(`ยืนยันการส่งข้อมูลเจ้าหน้าที่จำนวน ${visibleButtons.length} รายการ?`)) return;
+
+        $(this).prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Processing...');
+        appendLog(`🎬 เริ่มต้นการส่งข้อมูลแบบกลุ่มจำนวน ${visibleButtons.length} รายการ...`);
+
+        for (let i = 0; i < visibleButtons.length; i++) {
+            await new Promise((resolve) => {
+                syncSingleRow($(visibleButtons[i]), token, resolve);
+            });
+            await new Promise(r => setTimeout(r, 300));
+        }
+        $(this).prop('disabled', false).html('<i class="fa-solid fa-cloud-arrow-up me-1"></i> Sync All');
+        appendLog(`🏁 เสร็จสิ้นการประมวลผลทั้งหมด`, 'success');
+    });
+
+    // 7. ปุ่มรีเฟรชตาราง
+    $('#btnRefresh').click(function() {
+        const btn = $(this);
+        btn.find('i').addClass('fa-spin');
+        btn.prop('disabled', true);
+        appendLog(`🔄 กำลังรีเฟรชข้อมูลตาราง...`);
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    });
+
+    // 8. ปุ่ม Retrieve Data (ดึงข้อมูลกลับมาเก็บในตารางสำรอง)
+    $('#btnRetrieve').click(function() {
+        const token = $('#api_token').val().trim();
+        const hosp_code = $('#hosp_code').val();
+
+        if (!token) {
+            bootstrap.Collapse.getOrCreateInstance('#apiConfigSection').show();
+            alert('กรุณาใส่ Token ในส่วนตั้งค่าก่อนดึงข้อมูลครับ');
+            return;
+        }
+        if (!confirm(`ยืนยันการดึงข้อมูลจากระบบ MOPH (Retrieve) ของหน่วยงาน ${hosp_code} หรือไม่?`)) return;
+
+        const btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Processing...');
+        appendLog(`🎬 เริ่มต้นการ Retrieve ข้อมูลจาก MOPH API...`);
+
+        $.ajax({
+            url: 'process_retrieve_to_db.php',
+            method: 'POST',
+            data: { token: token, hosp_code: hosp_code },
+            success: function(response) {
+                try {
+                    const res = typeof response === 'object' ? response : JSON.parse(response);
+                    if(res.status === 'success') {
+                        appendLog(`✅ สำเร็จ: ${res.message}`);
+                        alert(res.message);
+                    } else {
+                        appendLog(`❌ ผิดพลาด: ${res.message}`);
+                        alert('Error: ' + res.message);
+                    }
+                } catch(e) {
+                    appendLog(`⚠️ Error: การตอบกลับจาก Server ผิดพลาด`);
+                }
+                btn.prop('disabled', false).html('<i class="fa-solid fa-cloud-arrow-down me-1"></i> Retrieve Data');
+            },
+            error: function() {
+                appendLog(`🚫 Connection Failed: ติดต่อไฟล์ประมวลผลไม่ได้`);
+                btn.prop('disabled', false).html('<i class="fa-solid fa-cloud-arrow-down me-1"></i> Retrieve Data');
             }
         });
     });
-
-    function appendLog(msg) {
-        const log = $('#log_output');
-        log.append(`\n[${new Date().toLocaleTimeString()}] ${msg}`);
-        log.scrollTop(log[0].scrollHeight);
-    }
 });
 </script>
 </body>

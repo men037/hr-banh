@@ -158,17 +158,21 @@ function isActive($filenames) {
 
     <div class="menu-label">Provider</div>
     <nav class="nav flex-column">
-        <a href="moph_api_sync.php" class="nav-link <?php echo isActive('user_manage.php'); ?>">
-           <i class="fa-solid fa-cloud-arrow-up"></i> <span> MOPH API Sync (PHR1)</span>
+        <a href="moph_api_sync.php" class="nav-link <?php echo isActive('moph_api_sync.php'); ?>">
+           <i class="fa-solid fa-cloud-arrow-up"></i> <span> MOPH API Sync</span>
         </a>
+        <a href="view_moph_retrieve.php" class="nav-link <?php echo isActive('view_moph_retrieve.php'); ?>">
+        <i class="fa-solid fa-database"></i> <span> MOPH (Retrieve)</span>
+        </a>
+
     </nav>
     <div class="menu-label">ตั้งค่า</div>
     <nav class="nav flex-column">
         <a href="user_manage.php" class="nav-link <?php echo isActive('user_manage.php'); ?>">
-           <i class="fa-solid fa-snowflake"></i> <span>จัดการผู้ใช้งาน</span>
+           <i class="fa-solid fa-users-gear"></i> <span>จัดการผู้ใช้งาน</span>
         </a>
          <a href="view_logs.php" class="nav-link <?php echo isActive('view_logs.php'); ?>">
-            <i class="fa-solid fa-person-military-rifle"></i> <span>ประวัติการใช้งาน</span>
+            <i class="fa-solid fa-clock-rotate-left"></i> <span>ประวัติการใช้งาน</span>
         </a>
     </nav>
 

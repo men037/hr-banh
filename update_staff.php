@@ -4,6 +4,9 @@ checkAdmin();
 include('config.php');
 date_default_timezone_set('Asia/Bangkok');
 
+// --- [จุดที่ 1] รับค่าหน้าที่จะให้กลับไปไว้ที่นี่ ---
+$return_to = isset($_POST['return_to']) ? $_POST['return_to'] : 'staff_list.php';
+
 if (!function_exists('write_log')) {
     function write_log($conn, $action, $table, $id, $details) {
         $user_id = $_SESSION['user_id'] ?? 'system';
@@ -136,15 +139,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (mysqli_query($conn, $sql)) {
         write_log($conn, 'EDIT', 'staff_main', $staff_id, $log_details);
         echo "<!DOCTYPE html><html><head><script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script></head><body><script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'อัปเดตข้อมูลสำเร็จ',
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => { window.location.href='staff_list.php'; });
-            </script></body></html>";
-    } else {
-        echo "Error: " . mysqli_error($conn);
-    }
+        Swal.fire({
+            icon: 'success',
+            title: 'อัปเดตข้อมูลสำเร็จ',
+            showConfirmButton: false,
+            timer: 1500
+        }).then(() => { 
+            window.location.href = '$return_to'; // เปลี่ยนจาก 'staff_list.php' เป็น $return_to
+        });
+    </script></body></html>";
+} else {
+echo "Error: " . mysqli_error($conn);
+}
 }
 ?>

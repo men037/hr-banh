@@ -73,7 +73,7 @@ $show_all = (isset($_GET['show_all']) && $_GET['show_all'] == '1');
         <div class="container-fluid"> 
                <nav class="navbar navbar-dark mb-4 shadow-sm" style="border-radius: 15px;">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="index.php">รายชื่อเจ้าหน้าที่ (ตาม จ)</a>
+            <a class="navbar-brand fw-bold" href="index.php"><i class="fa-solid fa-file-invoice"></i> รายชื่อเจ้าหน้าที่ (ตาม จ)</a>
         </div>
     </nav>
             <div class="d-flex justify-content-end gap-2 w-100 mb-3">

@@ -3,6 +3,9 @@ include('auth.php');
 checkAdmin(); 
 include('config.php'); 
 
+// --- [จุดที่ 1] รับค่าหน้าที่จะให้กลับไป ---
+$return_to = isset($_GET['return_to']) ? $_GET['return_to'] : 'staff_list.php';
+
 if (isset($_GET['id'])) {
     $cid_to_edit = mysqli_real_escape_string($conn, $_GET['id']);
     $sql = "SELECT * FROM staff_main WHERE cid = '$cid_to_edit'";
@@ -153,6 +156,7 @@ if (isset($_GET['id'])) {
         </div>
         <div class="card-body p-4 p-lg-4">
             <form action="update_staff.php" method="POST">
+                <input type="hidden" name="return_to" value="<?php echo $return_to; ?>">
                 <input type="hidden" name="old_cid" value="<?php echo $row['cid']; ?>">
 
                 <div class="section-title"><i class="fas fa-id-card"></i> ข้อมูลส่วนตัวและรหัสพนักงาน</div>
@@ -418,7 +422,7 @@ if (isset($_GET['id'])) {
                     <button type="submit" class="btn btn-save shadow-sm me-3">
                         <i class="fas fa-save me-2"></i>บันทึกการแก้ไข
                     </button>
-                    <a href="staff_list.php" class="btn btn-outline-secondary px-5" style="border-radius: 30px;">ยกเลิก</a>
+                    <a href="<?php echo $return_to; ?>" class="btn btn-outline-secondary px-5" style="border-radius: 30px;">ยกเลิก</a>
                 </div>
             </form>
         </div>
