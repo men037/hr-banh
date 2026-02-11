@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $fname = mysqli_real_escape_string($conn, $_POST['fname']);
     $lname = mysqli_real_escape_string($conn, $_POST['lname']);
     $position_no = mysqli_real_escape_string($conn, $_POST['position_no']); 
-    $workplace_s = mysqli_real_escape_string($conn, $_POST['workplace_s']); 
+    $workplace_s = isset($_POST['workplace_s']) ? mysqli_real_escape_string($conn, $_POST['workplace_s']) : '';
     
     // 3. จัดการข้อมูลรหัสอ้างอิง
     $prefix_id = mysqli_real_escape_string($conn, $_POST['prefix_id']);
@@ -70,11 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </script>";
         exit;
     }
+   
+    $xcid = substr($cid, 0, 3) . 'xxxxxxx' . substr($cid, -3);
 
-    // 9. คำสั่ง SQL INSERT (เพิ่มฟิลด์ status_s เข้าไปใน Query)
- // 9. คำสั่ง SQL INSERT (ตรวจสอบลำดับฟิลด์และค่าให้ตรงกัน)
     $sql = "INSERT INTO staff_main (
-                cid, 
+                cid,
+                xcid, 
                 staff_id, 
                 license_no, 
                 fname, 
@@ -100,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 updated_at
             ) VALUES (
                 '$cid', 
+                '$xcid',
                 '$staff_id', 
                 '$license_no', 
                 '$fname', 

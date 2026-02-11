@@ -15,7 +15,7 @@ if (empty($token)) {
     exit;
 }
 
-// ปรับ URL ตามที่ทดสอบผ่านใน Postman (POST แต่ส่ง Params ผ่าน URL)
+// ปรับ URL ตามที่ทดสอบผ่านใน Postman
 $url = "https://phr1.moph.go.th/idp/api/update_moph_personnel?hospital_code=$hosp_code&Action=Retrieve";
 
 $ch = curl_init();
@@ -42,12 +42,16 @@ if ($curl_error) {
 $data = json_decode($response, true);
 
 if ($httpCode == 200 && isset($data['result'])) {
-    $count_process = 0;
     
     if (empty($data['result'])) {
         echo json_encode(['status' => 'error', 'message' => 'เชื่อมต่อสำเร็จ แต่ไม่พบข้อมูลในระบบ MOPH']);
         exit;
     }
+
+    // --- เพิ่มตรงนี้: ล้างข้อมูลเก่าทิ้งก่อนเริ่มบันทึกใหม่ เพื่อป้องกันข้อมูลขยะค้าง ---
+    mysqli_query($conn, "TRUNCATE TABLE staff_moph_retrieve"); 
+    
+    $count_process = 0;
 
     foreach ($data['result'] as $row) {
         // เตรียมข้อมูลและป้องกัน SQL Injection
@@ -56,14 +60,17 @@ if ($httpCode == 200 && isset($data['result'])) {
         $prefix = mysqli_real_escape_string($conn, $row['prefix']);
         $fname = mysqli_real_escape_string($conn, $row['first_name']);
         $lname = mysqli_real_escape_string($conn, $row['last_name']);
-        $type_name = mysqli_real_escape_string($conn, $row['type_name']);
-        $dept_name = mysqli_real_escape_string($conn, $row['department_name']);
-        $pos_name = mysqli_real_escape_string($conn, $row['position_name']);
-        $pos_type = mysqli_real_escape_string($conn, $row['position_type_name']);
-        $pos_level = mysqli_real_escape_string($conn, $row['position_level_name']);
-        $pos_code = mysqli_real_escape_string($conn, $row['position_code']);
-        $pos_std_id = intval($row['position_std_id']);
-        $pos_std_type_id = intval($row['position_std_type_id']);
+        
+        // ตรวจสอบค่าว่างสำหรับฟิลด์ที่เป็น String
+        $type_name = mysqli_real_escape_string($conn, $row['type_name'] ?? '');
+        $dept_name = mysqli_real_escape_string($conn, $row['department_name'] ?? '');
+        $pos_name = mysqli_real_escape_string($conn, $row['position_name'] ?? '');
+        $pos_type = mysqli_real_escape_string($conn, $row['position_type_name'] ?? '');
+        $pos_level = mysqli_real_escape_string($conn, $row['position_level_name'] ?? '');
+        $pos_code = mysqli_real_escape_string($conn, $row['position_code'] ?? '');
+        
+        $pos_std_id = intval($row['position_std_id'] ?? 0);
+        $pos_std_type_id = intval($row['position_std_type_id'] ?? 0);
         $is_hr = ($row['is_hr_admin'] == true) ? 1 : 0;
         $has_prov = ($row['has_provider_id'] == true) ? 1 : 0;
 
@@ -76,7 +83,16 @@ if ($httpCode == 200 && isset($data['result'])) {
                 prefix = VALUES(prefix),
                 first_name = VALUES(first_name),
                 last_name = VALUES(last_name),
+                type_name = VALUES(type_name),
+                department_name = VALUES(department_name),
                 position_name = VALUES(position_name),
+                position_type_name = VALUES(position_type_name),
+                position_level_name = VALUES(position_level_name),
+                position_code = VALUES(position_code),
+                position_std_id = VALUES(position_std_id),
+                position_std_type_id = VALUES(position_std_type_id),
+                is_hr_admin = VALUES(is_hr_admin),
+                has_provider_id = VALUES(has_provider_id),
                 last_update = CURRENT_TIMESTAMP";
 
         if (mysqli_query($conn, $sql)) {
@@ -86,7 +102,7 @@ if ($httpCode == 200 && isset($data['result'])) {
 
     echo json_encode([
         'status' => 'success', 
-        'message' => "Retrieve สำเร็จ! บันทึก/อัปเดตข้อมูลได้ $count_process รายการ"
+        'message' => "Retrieve สำเร็จ! บันทึกข้อมูลใหม่ทั้งหมด $count_process รายการ"
     ]);
 } else {
     $msg = isset($data['Message']) ? $data['Message'] : 'HTTP Error Code: ' . $httpCode;

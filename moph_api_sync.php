@@ -26,12 +26,14 @@ $sql = "SELECT
           pos.`name` AS position,
           sm.ekyc_status,
           sm.provider_status,
-          sm.work_status
+          sm.work_status,
+          smr.has_provider_id
         FROM
           staff_main sm
           LEFT JOIN ref_prefix rp ON rp.id = sm.prefix_id
           LEFT JOIN ref_provider_pos pr ON pr.id = sm.provider_pos_id
           LEFT JOIN ref_position pos ON pos.id = sm.position_id
+          LEFT JOIN staff_moph_retrieve smr ON smr.moph_id = sm.idmoph 
         WHERE sm.work_status = '$status_mode'  
         ORDER BY sm.staff_id ASC";
 
@@ -190,6 +192,7 @@ $result = mysqli_query($conn, $sql);
                                     <th>ตำแหน่ง Provider</th>
                                     <th class="text-center">eKYC</th>
                                     <th class="text-center">Provider</th>
+                                    <th class="text-center">C-Provider</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -209,19 +212,34 @@ $result = mysqli_query($conn, $sql);
                                             ? '<i class="fa-solid fa-circle-check text-success" title="Provider Active"></i>' 
                                             : '<i class="fa-solid fa-circle-xmark text-danger opacity-50" title="Inactive"></i>'; ?>
                                     </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-1">
-                                            <button class="btn btn-sm btn-primary btn-sync" 
-                                                data-staff='<?php echo json_encode($row, JSON_UNESCAPED_UNICODE); ?>' title="ส่งข้อมูลเข้า MOPH">
-                                                <i class="fa-solid fa-rotate"></i> Sync
-                                            </button>
-                                            
-                                            <a href="edit.php?id=<?php echo $row['cid']; ?>&return_to=moph_api_sync.php" 
-                                            class="btn btn-sm btn-outline-warning" title="แก้ไขข้อมูลพื้นฐาน">
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            </a>
-                                        </div>
+
+                                    <td class="text-center status-indicator">
+                                        <?php echo $row['has_provider_id'] == '1' 
+                                            ? '<i class="fa-solid fa-circle-check text-success" title="Provider Active"></i>' 
+                                            : '<i class="fa-solid fa-circle-xmark text-danger opacity-50" title="Inactive"></i>'; ?>
                                     </td>
+
+                                    <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <button class="btn btn-sm btn-primary btn-sync" 
+                                                data-staff='<?php echo json_encode($row, JSON_UNESCAPED_UNICODE); ?>' title="ส่งเข้า IDPADMIN">
+                                            <!-- <i class="fa-solid fa-rotate"></i> -->
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        </button>
+
+                                        <button class="btn btn-sm btn-danger btn-delete-moph" 
+                                                data-cid="<?php echo $row['cid']; ?>" 
+                                                data-name="<?php echo $row['first_name']; ?>"
+                                                title="ลบออกจาก IDPADMIN">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                        
+                                        <a href="edit.php?id=<?php echo $row['cid']; ?>&return_to=moph_api_sync.php" 
+                                        class="btn btn-sm btn-warning text-white shadow-sm" title="แก้ไขข้อมูล">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                    </div>
+                                </td>
                                 </tr>
                                 <?php endwhile; ?>
                                 <tr id="noData" style="display:none;"><td colspan="6" class="text-center py-4 text-muted">ไม่พบข้อมูล...</td></tr>
@@ -230,13 +248,16 @@ $result = mysqli_query($conn, $sql);
                     </div>
                 </div>
 
-                <div class="card p-4 bg-dark">
-                    <div class="d-flex justify-content-between align-items-center mb-2 text-white">
-                        <h6 class="fw-bold mb-0"><i class="fa-solid fa-terminal me-2"></i>Console Log Output</h6>
-                        <button class="btn btn-sm btn-outline-light py-0" onclick="$('#log_output').empty().append('> Cleared...')">ล้าง Log</button>
-                    </div>
-                    <div id="log_output" class="status-log">> Ready for API synchronization...</div>
+                <div class="card p-2 bg-dark shadow-sm" style="border: 1px solid #444;"> <div class="d-flex justify-content-between align-items-center mb-1 text-white"> <h6 class="fw-bold mb-0" style="font-size: 0.85rem;"> <i class="fa-solid fa-terminal me-2 text-warning"></i>Console Log Output
+                    </h6>
+                    <button class="btn btn-sm btn-outline-light py-0" style="font-size: 0.7rem;" onclick="$('#log_output').empty().append('> Cleared...')">ล้าง Log</button>
                 </div>
+                
+                <div id="log_output" class="status-log" 
+                    style="max-height: 120px; overflow-y: auto; font-size: 0.8rem; line-height: 1.4; color: #00ff00; background: #000; padding: 8px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">
+                    > Ready for API synchronization...
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -274,7 +295,7 @@ $(document).ready(function() {
         let colorClass = 'text-info'; 
         if (msg.includes('✅')) colorClass = 'text-success';
         if (msg.includes('❌') || msg.includes('🚫')) colorClass = 'text-danger';
-        if (msg.includes('⚠️') || msg.includes('🚀') || msg.includes('🎬') || msg.includes('📡') || msg.includes('🔄')) colorClass = 'text-warning';
+        if (msg.includes('⚠️') || msg.includes('🚀') || msg.includes('🎬') || msg.includes('📡') || msg.includes('🔄') || msg.includes('🗑️')) colorClass = 'text-warning';
 
         const logItem = `
             <div class="log-line mb-1">
@@ -329,6 +350,56 @@ $(document).ready(function() {
             return;
         }
         syncSingleRow($(this), token);
+    });
+
+    // === เพิ่มเติม: ปุ่ม Delete รายบุคคล ===
+    $(document).on('click', '.btn-delete-moph', function() {
+        const cid = $(this).data('cid');
+        const name = $(this).data('name');
+        const token = $('#api_token').val().trim();
+
+        if (!token) {
+            bootstrap.Collapse.getOrCreateInstance('#apiConfigSection').show();
+            alert('กรุณาใส่ Token ก่อนทำการลบครับ');
+            return;
+        }
+
+        // ระบบยืนยันก่อนลบ (Safety First)
+        if (!confirm(`⚠️ ยืนยันการลบคุณ "${name}" ออกจากระบบ MOPH ใช่หรือไม่?\n\n*หมายเหตุ: ข้อมูลจะถูกลบออกจากฐานข้อมูลกลางของกระทรวงทันที`)) {
+            return;
+        }
+
+        const btn = $(this);
+        const oldHtml = btn.html();
+        
+        // แสดงสถานะกำลังทำงาน
+        btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+        appendLog(`🗑️ [${cid}] กำลังส่งคำสั่งลบพนักงานออกจาก MOPH...`, 'warning');
+
+        $.ajax({
+            url: 'process_delete_moph.php',
+            method: 'POST',
+            data: { 
+                token: token, 
+                cid: cid 
+            },
+            success: function(res) {
+                if (res.status === 'success') {
+                    appendLog(`✅ ลบสำเร็จ: ${name} ออกจาก MOPH เรียบร้อยแล้ว`, 'success');
+                    alert(res.message);
+                    // เปลี่ยนสถานะปุ่มเพื่อแจ้งว่าลบแล้ว
+                    btn.removeClass('btn-danger').addClass('btn-secondary').html('<i class="fa-solid fa-user-minus"></i>');
+                } else {
+                    appendLog(`❌ ลบไม่สำเร็จ: ${res.message}`, 'danger');
+                    alert('เกิดข้อผิดพลาด: ' + res.message);
+                    btn.prop('disabled', false).html(oldHtml);
+                }
+            },
+            error: function() {
+                appendLog(`🚫 Connection Failed: ไม่สามารถติดต่อไฟล์ประมวลผลการลบได้`, 'danger');
+                btn.prop('disabled', false).html(oldHtml);
+            }
+        });
     });
 
     // 6. ปุ่ม Sync All

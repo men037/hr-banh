@@ -59,18 +59,28 @@ $total_rows = mysqli_num_rows($result);
 
     <div class="container-fluid px-0">
         <div class="card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div>
-                    <h5 class="fw-bold mb-0 text-secondary">
-                        ข้อมูลล่าสุดในตารางพัก (ทั้งหมด <?php echo number_format($total_rows); ?> รายการ)
-                    </h5>
-                    <small class="text-muted">ข้อมูลนี้ดึงมาจาก API เพื่อใช้ตรวจสอบความถูกต้อง</small>
-                </div>
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาชื่อ, CID, ตำแหน่ง...">
+           <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <h5 class="fw-bold mb-0 text-secondary">
+                    ข้อมูลล่าสุดในตารางพัก (ทั้งหมด <?php echo number_format($total_rows); ?> รายการ)
+                </h5>
+                <small class="text-muted">ข้อมูลนี้ดึงมาจาก API เพื่อใช้ตรวจสอบความถูกต้อง</small>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <button id="btnUpdateMainID" class="btn btn-primary text-white shadow-sm btn-sm d-flex align-items-center justify-content-center" 
+                        style="height: 31px; padding: 0 15px; line-height: 1;">
+                    <i class="fa-solid fa-id-card-clip me-1"></i> อัปเดต ID เข้าตารางหลัก
+                </button>
+                
+                <div class="search-box mb-0">
+                    <i class="fa-solid fa-magnifying-glass" style="top: 50%; transform: translateY(-50%);"></i>
+                    <input type="text" id="searchInput" class="form-control form-control-sm" 
+                        placeholder="ค้นหาชื่อ, CID..." 
+                        style="min-width: 250px; height: 31px;">
                 </div>
             </div>
+        </div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle" id="mophTable">
@@ -80,7 +90,7 @@ $total_rows = mysqli_num_rows($result);
                             <th>เลขบัตรประชาชน</th>
                             <th>ตำแหน่งในระบบ MOPH</th>
                             <th>หน่วยงาน</th>
-                            <th class="text-center">HR Admin</th>
+                            <th class="text-center">Provider</th>
                             <th class="text-center">อัปเดตล่าสุด</th>
                         </tr>
                     </thead>
@@ -99,7 +109,7 @@ $total_rows = mysqli_num_rows($result);
                                 </td>
                                 <td><small><?php echo $row['department_name']; ?></small></td>
                                 <td class="text-center">
-                                    <?php echo $row['is_hr_admin'] ? '<i class="fa-solid fa-check-circle text-success"></i>' : '-'; ?>
+                                    <?php echo $row['has_provider_id'] ? '<i class="fa-solid fa-check-circle text-success"></i>' : '<i class="fa-solid fa-circle-xmark text-danger"></i>'; ?>
                                 </td>
                                 <td class="text-center">
                                     <small class="text-muted"><?php echo date('d/m/Y H:i', strtotime($row['last_update'])); ?></small>
@@ -134,6 +144,30 @@ $(document).ready(function() {
         $("#tableBody tr").filter(function() {
             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
+    });
+});
+$('#btnUpdateMainID').click(function() {
+    if (!confirm('ยืนยันการนำ MOPH ID ไปอัปเดตเข้าฐานข้อมูลหลัก เฉพาะรายที่ยังไม่มีข้อมูล?')) return;
+
+    const btn = $(this);
+    btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-1"></i> กำลังอัปเดต...');
+
+    $.ajax({
+        url: 'process_update_idmoph.php',
+        method: 'POST',
+        success: function(res) {
+            if (res.status === 'success') {
+                alert(res.message);
+                if(typeof appendLog === 'function') appendLog(`✅ ${res.message}`, 'success');
+            } else {
+                alert('ผิดพลาด: ' + res.message);
+            }
+            btn.prop('disabled', false).html('<i class="fa-solid fa-id-card-clip me-1"></i> อัปเดต ID เข้าตารางหลัก');
+        },
+        error: function() {
+            alert('ไม่สามารถติดต่อไฟล์ประมวลผลได้');
+            btn.prop('disabled', false).html('<i class="fa-solid fa-id-card-clip me-1"></i> อัปเดต ID เข้าตารางหลัก');
+        }
     });
 });
 </script>
