@@ -27,7 +27,8 @@ $sql = "SELECT
           sm.ekyc_status,
           sm.provider_status,
           sm.work_status,
-          smr.has_provider_id
+          smr.has_provider_id,
+          sm.idmoph
         FROM
           staff_main sm
           LEFT JOIN ref_prefix rp ON rp.id = sm.prefix_id
@@ -187,6 +188,7 @@ $result = mysqli_query($conn, $sql);
                         <table class="table table-hover align-middle" id="staffTable">
                             <thead class="sticky-top bg-white">
                                 <tr>
+                                    <th>IDMoph</th>
                                     <th>ชื่อ-นามสกุล</th>
                                     <th>ตำแหน่ง</th>
                                     <th>ตำแหน่ง Provider</th>
@@ -199,6 +201,7 @@ $result = mysqli_query($conn, $sql);
                             <tbody id="tableBody">
                                 <?php while($row = mysqli_fetch_assoc($result)): ?>
                                 <tr>
+                                    <td><small><?php echo $row['idmoph'] ?? '-'; ?></small></td>
                                     <td><small class="fw-bold"><?php echo $row['prefix'].$row['first_name'].' '.$row['last_name']; ?></small></td>
                                     <td><small><?php echo $row['position'] ?? '-'; ?></small></td>
                                     <td><small><?php echo $row['position_name'] ?? '-'; ?></small></td>

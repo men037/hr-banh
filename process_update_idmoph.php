@@ -5,12 +5,10 @@ checkSuperAdmin();
 
 header('Content-Type: application/json');
 
-// คำสั่ง SQL สำหรับ Update โดยการ Join
-// เชื่อมตาราง staff_main (M) กับ staff_moph_retrieve (R)
-// โดย M.xcid = R.cid (เพราะคุณต้องการใช้ xcid ที่ Mask แล้วในการ Join)
+
 // และอัปเดตเฉพาะ M.idmoph ที่เป็น NULL หรือว่าง
 $sql = "UPDATE staff_main M
-        INNER JOIN staff_moph_retrieve R ON M.xcid = R.cid
+        INNER JOIN staff_moph_retrieve R ON CONCAT(M.fname,M.lname) = CONCAT(R.first_name,R.last_name)
         SET M.idmoph = R.moph_id
         WHERE M.idmoph IS NULL OR M.idmoph = '' OR M.idmoph = 0";
 
